@@ -13,12 +13,14 @@ func main() {
 	destDir := flag.String("destination", "", "the to be created destination directory")
 	flag.Parse()
 	if flag.NFlag() < 2 {
-		printHelp()
+		flag.PrintDefaults()
 		os.Exit(1)
 	}
 	checkSrc(*srcDir)
 	checkDst(*destDir)
 	os.MkdirAll(*destDir, 0777)
+	sourcefiles :=  SourceFiles{path: *srcDir}
+	sourcefiles.Copy(*destDir)
 	fmt.Println("Created new Directory: " + *destDir)
 }
 
@@ -32,8 +34,4 @@ func listDirectory(dir string) {
 			fmt.Println("item: ", val.Name())
 		}
 	}
-}
-
-func printHelp() {
-	flag.PrintDefaults()
 }
