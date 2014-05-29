@@ -1,17 +1,39 @@
 package main
 
-import ( 
+import (
   "fmt"
-  "os"
+	"flag"
+	"io/ioutil"
+	"os"
   )
 
-var sourceDir, destDir string
+var sDir, sourceDir, destDir string
 func main() {
-  if len(os.Args) < 3 {
-    fmt.Println("Usage: securecopy [directory] [destination]")
-    return 
-  } else { 
-    sourceDir = os.Args[1]
-    destDir = os.Args[2]
-  }
+	srcDir := flag.String("source", "" , "the source directory")
+	destDir := flag.String("destination", "", "the to be created destination directory")
+	flag.Parse()
+	if flag.NFlag() < 2 {
+		printHelp()
+		os.Exit(1)
+	}
+	checkSrc(*srcDir)
+	checkDst(*destDir)
+	os.MkdirAll(*destDir, 0777)
+	fmt.Println("Created new Directory: " + *destDir)
+}
+
+
+func listDirectory(dir string) {
+	var list, err = ioutil.ReadDir(dir)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	} else {
+		for _, val := range list {
+			fmt.Println("item: ", val.Name())
+		}
+	}
+}
+
+func printHelp() {
+	flag.PrintDefaults()
 }
