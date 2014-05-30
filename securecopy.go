@@ -18,10 +18,7 @@ func main() {
 	}
 	checkSrc(*srcDir)
 	checkDst(*destDir)
-	os.MkdirAll(*destDir, 0777)
-	sourcefiles :=  SourceFiles{path: *srcDir}
-	sourcefiles.Copy(*destDir)
-	fmt.Println("Created new Directory: " + *destDir)
+	CopyDir(*srcDir, *destDir)
 }
 
 
