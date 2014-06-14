@@ -69,7 +69,7 @@ func CopyFile(source string, dest string) (err error) {
 	  return err
 	}
 
-	var _tmp = CheckMd5(sf)
+	_tmp := CheckMd5(sf)
 	addToMap(source, _tmp)
 	defer sf.Close()
 	df, err := os.Create(dest)
@@ -83,8 +83,12 @@ func CopyFile(source string, dest string) (err error) {
 		if err != nil {
 			err = os.Chmod(dest, si.Mode())
 		}
+		if CheckMd5(df) == CheckMd5(sf) {
+			fmt.Println("successfully copied: ", source)
+		} else {
+			fmt.Println("error while copying: ", source)
+		}
 	}
-	CheckMd5(df)
 	defer df.Close()
 	return
 }
