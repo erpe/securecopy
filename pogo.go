@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -62,20 +63,20 @@ func CopyDir(source string, dest string) (err error) {
 
 
 func CopyFile(source string, dest string) (err error) {
+
   sf, err := os.Open(source)
 	if err != nil {
 	  return err
 	}
 
-	CheckMd5(sf)
+	var _tmp = CheckMd5(sf)
+	addToMap(source, _tmp)
 	defer sf.Close()
 	df, err := os.Create(dest)
 	if err != nil {
 	  return err
 	}
 
-	CheckMd5(df)
-	defer df.Close()
 	_, err = io.Copy(df, sf)
 	if err == nil {
 	  si, err := os.Stat(source)
@@ -83,13 +84,21 @@ func CopyFile(source string, dest string) (err error) {
 			err = os.Chmod(dest, si.Mode())
 		}
 	}
+	CheckMd5(df)
+	defer df.Close()
 	return
 }
 
-func CheckMd5(file io.Reader) {
+func CheckMd5(file io.Reader) (sum string) {
 	md5 := md5.New()
 	io.Copy(md5, file)
 	fmt.Println("md5: ")
 	fmt.Printf("%x\t%s\n", md5.Sum(nil), file )
+	sum = hex.EncodeToString(md5.Sum(nil))
+	return sum
+}
+
+func addToMap(key string, value string) {
+	fileMap[key] = value
 }
 
