@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"securecopy/protocoll"
 )
 
 type CopyError struct {
@@ -84,6 +85,7 @@ func CopyFile(source string, dest string) (err error) {
 			err = os.Chmod(dest, si.Mode())
 		}
 		if CheckMd5(df) == CheckMd5(sf) {
+			protocoll.Success("Success: " + "foo")
 			fmt.Println("successfully copied: ", source)
 		} else {
 			fmt.Println("error while copying: ", source)
@@ -96,6 +98,7 @@ func CopyFile(source string, dest string) (err error) {
 func CheckMd5(file io.Reader) (sum string) {
 	md5 := md5.New()
 	io.Copy(md5, file)
+	log.Println("with log md5: ")
 	fmt.Println("md5: ")
 	fmt.Printf("%x\t%s\n", md5.Sum(nil), file )
 	sum = hex.EncodeToString(md5.Sum(nil))

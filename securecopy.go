@@ -5,6 +5,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"os"
+	"securecopy/protocoll"
   )
 
 var sDir, sourceDir, destDir string
@@ -22,7 +23,13 @@ func main() {
 	fileMap = make(map[string]string)
 	checkSrc(*srcDir)
 	checkDst(*destDir)
-	CopyDir(*srcDir, *destDir)
+	protocoll.Initialize(*destDir)
+	err := CopyDir(*srcDir, *destDir)
+	if err != nil {
+		fmt.Println("Error while copying: ", err)
+	} else {
+		fmt.Println("copied: ", *srcDir)
+	}
 	fmt.Println(fileMap)
 }
 
