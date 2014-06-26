@@ -8,29 +8,46 @@ import (
 	"securecopy/protocoll"
   )
 
-var sDir, sourceDir, destDir string
+var sDir, sourceDir string
 var fileMap map[string]string
+var cfg Config
+
+type Config struct {
+	destinationDir string
+}
 
 func main() {
 	srcDir := flag.String("source", "" , "the source directory")
 	destDir := flag.String("destination", "", "the to be created destination directory")
-	//fileMap := make(map[string]string)
+
 	flag.Parse()
 	if flag.NFlag() < 2 {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
+
+	makeConfig(*destDir)
 	fileMap = make(map[string]string)
+
 	checkSrc(*srcDir)
 	checkDst(*destDir)
 	protocoll.Initialize(*destDir)
 	err := CopyDir(*srcDir, *destDir)
 	if err != nil {
-		fmt.Println("Error while copying: ", err)
+		fmt.Println("\nError while copying: ", err)
 	} else {
-		fmt.Println("copied: ", *srcDir)
+		fmt.Println("\nfinished copying: ", *srcDir)
+		fmt.Println("see : ", *destDir + "/protocol.txt for details...")
 	}
-	fmt.Println(fileMap)
+}
+
+func makeConfig(str string) {
+	cfg = Config{str}
+}
+
+func getConfig()(ret Config) {
+	ret = cfg
+	return ret
 }
 
 

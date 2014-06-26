@@ -32,7 +32,9 @@ func CopyDir(source string, dest string) (err error) {
 
 	_, err = os.Open(dest)
 
-	if !os.IsNotExist(err) {
+	cfg := getConfig()
+
+	if (dest != cfg.destinationDir) && (!os.IsNotExist(err)) {
 		msg := "Destination already exists: " + dest
 		return &CopyError{ msg }
 	}
@@ -66,17 +68,20 @@ func CopyDir(source string, dest string) (err error) {
 func CopyFile(source string, dest string) (err error) {
 
   sf, err := os.Open(source)
+
 	if err != nil {
 	  return err
 	}
 
-	_tmp := CheckMd5(sf)
-	addToMap(source, _tmp)
 	defer sf.Close()
+
 	df, err := os.Create(dest)
+
 	if err != nil {
 	  return err
 	}
+
+	defer df.Close()
 
 	_, err = io.Copy(df, sf)
 	if err == nil {
@@ -84,28 +89,23 @@ func CopyFile(source string, dest string) (err error) {
 		if err != nil {
 			err = os.Chmod(dest, si.Mode())
 		}
-		if CheckMd5(df) == CheckMd5(sf) {
-			protocoll.Success("Success: " + "foo")
-			fmt.Println("successfully copied: ", source)
+		destSum := CheckMd5(df)
+		sourceSum := CheckMd5(sf)
+		if destSum == sourceSum {
+			go protocoll.Success(dest + " : " + sourceSum + " : GOOD" )
+			go fmt.Print("+")
 		} else {
-			fmt.Println("error while copying: ", source)
+			go protocoll.Failure(source + " : " + sourceSum + " : MISMATCH")
+			go fmt.Print("E")
 		}
 	}
-	defer df.Close()
 	return
 }
 
 func CheckMd5(file io.Reader) (sum string) {
 	md5 := md5.New()
 	io.Copy(md5, file)
-	log.Println("with log md5: ")
-	fmt.Println("md5: ")
-	fmt.Printf("%x\t%s\n", md5.Sum(nil), file )
 	sum = hex.EncodeToString(md5.Sum(nil))
 	return sum
-}
-
-func addToMap(key string, value string) {
-	fileMap[key] = value
 }
 

@@ -6,38 +6,56 @@ import ("fmt"
 				"os"
 			)
 
+var filename string
 
-func Initialize(destDir string) {
+func Initialize(dest string) {
 	const layout = "Jan 2, 2006 at 3:04pm (MST)"
-	createLogDir(destDir)
+	createLogDir(dest)
 	now := time.Now()
 	logheader := "File-Copy - Protocol " + now.Format(layout)
-	filename := destDir + "/protocol.txt"
+	filename = dest + "/protocol.txt"
 	logheaderBytes := []byte(logheader + "\n")
 
 	err := ioutil.WriteFile(filename, logheaderBytes, 0644)
 
 	if err != nil {
 		fmt.Println("Error creating protokoll-file: ", err)
-	} else {
-		fmt.Println("Created protokollfile...")
 	}
 }
 
 func Success(str string, ) {
-	fmt.Println("testlog", str)
+	f := getFileHandle()
+	_, err := f.WriteString("SUCCESS: " + str + "\n")
+	if err != nil {
+		fmt.Println("Error writing protocol: ", err)
+		panic(err)
+	}
+	defer f.Close()
 }
 
 func Failure(str string) {
-	fmt.Println("failed: ", str)
+	f := getFileHandle()
+	_, err := f.WriteString("ERROR: " + str + "\n")
+	if err != nil {
+		fmt.Println("Error writing protocol: ", err)
+	}
+	defer f.Close()
+}
+
+func getFileHandle()(file *os.File) {
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		fmt.Println("Error - could not open Protokoll-file: ", err)
+		panic(err)
+	}
+	file = f
+	return file
 }
 
 func createLogDir(dest string) {
 	err := os.MkdirAll(dest, 0755)
 	if err != nil {
-		fmt.Println("Error creating destination directory: ", dest)
-	} else {
-		fmt.Println("Created destination directory: ", dest)
+		fmt.Println("Error - could not create protokoll-directory: ", dest)
+		panic(err)
 	}
-
 }
