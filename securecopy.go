@@ -14,11 +14,13 @@ var cfg Config
 
 type Config struct {
 	destinationDir string
+	hashType string
 }
 
 func main() {
 	srcDir := flag.String("source", "" , "the source directory")
 	destDir := flag.String("destination", "", "the to be created destination directory")
+	hashType := flag.String("hashtype", "md5", "the hash to be used - default is md5. crc32 is faster")
 
 	flag.Parse()
 	if flag.NFlag() < 2 {
@@ -26,7 +28,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	makeConfig(*destDir)
+	makeConfig(*destDir, *hashType)
 	fileMap = make(map[string]string)
 
 	checkSrc(*srcDir)
@@ -41,8 +43,8 @@ func main() {
 	}
 }
 
-func makeConfig(str string) {
-	cfg = Config{str}
+func makeConfig(dst string, ht string) {
+	cfg = Config{dst, ht}
 }
 
 func getConfig()(ret Config) {

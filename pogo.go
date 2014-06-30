@@ -89,6 +89,7 @@ func CopyFile(source string, dest string) (err error) {
 		if err != nil {
 			err = os.Chmod(dest, si.Mode())
 		}
+		checkHash(sf)
 		destSum := CheckMd5(df)
 		sourceSum := CheckMd5(sf)
 		if destSum == sourceSum {
@@ -100,6 +101,12 @@ func CopyFile(source string, dest string) (err error) {
 		}
 	}
 	return
+}
+
+func checkHash(file io.Reader) (sum string) {
+	c := getConfig()
+	fmt.Println("config: " + c.hashType)
+	return "foobar"
 }
 
 func CheckMd5(file io.Reader) (sum string) {
