@@ -2,7 +2,9 @@ package main
 
 import (
 	"crypto/md5"
+	"hash/crc32"
 	"encoding/hex"
+	"strconv"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -89,9 +91,21 @@ func CopyFile(source string, dest string) (err error) {
 		if err != nil {
 			err = os.Chmod(dest, si.Mode())
 		}
-		checkHash(sf)
-		destSum := CheckMd5(df)
-		sourceSum := CheckMd5(sf)
+
+		c := getConfig()
+
+		var destSum, sourceSum string
+
+		if c.hashType == "md5" {
+			destSum = checkMd5(sf)
+			sourceSum = checkMd5(df)
+		}
+
+		if c.hashType == "crc32" {
+			destSum = checkCrc32(source)
+			sourceSum = checkCrc32(dest)
+		}
+
 		if destSum == sourceSum {
 			go protocoll.Success(dest + " : " + sourceSum + " : GOOD" )
 			go fmt.Print("+")
@@ -103,16 +117,25 @@ func CopyFile(source string, dest string) (err error) {
 	return
 }
 
-func checkHash(file io.Reader) (sum string) {
-	c := getConfig()
-	fmt.Println("config: " + c.hashType)
-	return "foobar"
-}
 
-func CheckMd5(file io.Reader) (sum string) {
-	md5 := md5.New()
-	io.Copy(md5, file)
-	sum = hex.EncodeToString(md5.Sum(nil))
+func checkMd5(file io.Reader) (sum string) {
+	h := md5.New()
+	io.Copy(h, file)
+	sum = hex.EncodeToString(h.Sum(nil))
 	return sum
 }
 
+func checkCrc32(fileName string) (sum string) {
+	h := crc32.NewIEEE()
+	b, err := ioutil.ReadFile(fileName)
+
+	if err != nil {
+		printErrAndExit("(crc32) Error reading: " + fileName)
+	} else {
+		h.Write(b)
+		sum = strconv.FormatUint(uint64(h.Sum32()), 10)
+		return sum
+	}
+
+	return
+}
