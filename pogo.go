@@ -4,11 +4,11 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/erpe/securecopy/protocoll"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
-	"securecopy/protocoll"
 )
 
 type CopyError struct {
@@ -16,9 +16,8 @@ type CopyError struct {
 }
 
 func (e *CopyError) Error() string {
-  return e.What
+	return e.What
 }
-
 
 func CopyDir(source string, dest string) (err error) {
 	fi, err := os.Stat(source)
@@ -27,7 +26,7 @@ func CopyDir(source string, dest string) (err error) {
 	}
 	if !fi.IsDir() {
 		msg := "Source is not a directory: " + source
-		return &CopyError{ msg }
+		return &CopyError{msg}
 	}
 
 	_, err = os.Open(dest)
@@ -36,7 +35,7 @@ func CopyDir(source string, dest string) (err error) {
 
 	if (dest != cfg.destinationDir) && (!os.IsNotExist(err)) {
 		msg := "Destination already exists: " + dest
-		return &CopyError{ msg }
+		return &CopyError{msg}
 	}
 
 	err = os.MkdirAll(dest, fi.Mode())
@@ -64,13 +63,12 @@ func CopyDir(source string, dest string) (err error) {
 	return
 }
 
-
 func CopyFile(source string, dest string) (err error) {
 
-  sf, err := os.Open(source)
+	sf, err := os.Open(source)
 
 	if err != nil {
-	  return err
+		return err
 	}
 
 	defer sf.Close()
@@ -78,21 +76,21 @@ func CopyFile(source string, dest string) (err error) {
 	df, err := os.Create(dest)
 
 	if err != nil {
-	  return err
+		return err
 	}
 
 	defer df.Close()
 
 	_, err = io.Copy(df, sf)
 	if err == nil {
-	  si, err := os.Stat(source)
+		si, err := os.Stat(source)
 		if err != nil {
 			err = os.Chmod(dest, si.Mode())
 		}
 		destSum := CheckMd5(df)
 		sourceSum := CheckMd5(sf)
 		if destSum == sourceSum {
-			go protocoll.Success(dest + " : " + sourceSum + " : GOOD" )
+			go protocoll.Success(dest + " : " + sourceSum + " : GOOD")
 			go fmt.Print("+")
 		} else {
 			go protocoll.Failure(source + " : " + sourceSum + " : MISMATCH")
@@ -108,4 +106,3 @@ func CheckMd5(file io.Reader) (sum string) {
 	sum = hex.EncodeToString(md5.Sum(nil))
 	return sum
 }
-

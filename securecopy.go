@@ -1,12 +1,12 @@
 package main
 
 import (
-  "fmt"
 	"flag"
+	"fmt"
+	"github.com/erpe/securecopy/protocoll"
 	"io/ioutil"
 	"os"
-	"securecopy/protocoll"
-  )
+)
 
 var sDir, sourceDir string
 var fileMap map[string]string
@@ -17,7 +17,7 @@ type Config struct {
 }
 
 func main() {
-	srcDir := flag.String("source", "" , "the source directory")
+	srcDir := flag.String("source", "", "the source directory")
 	destDir := flag.String("destination", "", "the to be created destination directory")
 
 	flag.Parse()
@@ -37,7 +37,7 @@ func main() {
 		fmt.Println("\nError while copying: ", err)
 	} else {
 		fmt.Println("\nfinished copying: ", *srcDir)
-		fmt.Println("see : ", *destDir + "/protocol.txt for details...")
+		fmt.Println("see : ", *destDir+"/protocol.txt for details...")
 	}
 }
 
@@ -45,11 +45,10 @@ func makeConfig(str string) {
 	cfg = Config{str}
 }
 
-func getConfig()(ret Config) {
+func getConfig() (ret Config) {
 	ret = cfg
 	return ret
 }
-
 
 func listDirectory(dir string) {
 	var list, err = ioutil.ReadDir(dir)
